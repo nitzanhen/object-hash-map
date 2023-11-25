@@ -2,7 +2,7 @@
 const isObject = (x: unknown): x is object => !!x && typeof x === 'object';
 
 /**
- * Deep equality function. Inspired by `fast-deep-equals`'s implementation. 
+ * Deep equality function. Draws inspiration from `fast-deep-equal`'s implementation.
  */
 export function equals(a: unknown, b: unknown): boolean {
   if (a === b) {

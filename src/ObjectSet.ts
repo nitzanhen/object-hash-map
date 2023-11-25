@@ -3,7 +3,7 @@ import { ObjectMap, ObjectMapOptions } from './ObjectMap';
 export class ObjectSet<T> {
   protected map: ObjectMap<T, true>;
 
-  constructor(options: ObjectMapOptions) {
+  constructor(options: ObjectMapOptions = {}) {
     this.map = new ObjectMap(options);
   }
 

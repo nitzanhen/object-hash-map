@@ -135,10 +135,18 @@ export class ObjectMap<K, V> {
     }
 
     for (let i = 0; i < bucket.length; i++) {
-      const { key: k, value } = bucket[i];
+      const { key: k, value, prev, next } = bucket[i];
       if (this.equals(key, k)) {
         bucket.splice(i, 1);
         this._size--;
+        if (prev !== null) {
+          const prevNode = this.getNode(prev)!;
+          prevNode.next = next;
+        }
+        if (next !== null) {
+          const nextNode = this.getNode(next)!;
+          nextNode.prev = prev;
+        }
         return value;
       }
     }

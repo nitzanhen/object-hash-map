@@ -1,9 +1,24 @@
 {
   "name": "objectmap",
-  "version": "1.0.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "0.1.0",
+  "description": "A TypeScript Map implementation that compares keys by data ",
+  "keywords": ["map", "hashmap", "hash", "typescript", "data-structures"],
+  "bugs": {
+    "url": "https://github.com/nitzanhen/objectmap/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nitzanhen/objectmap"
+  },
   "license": "MIT",
+  "author": "nitzanhen",
+  "files": ["dist"],
+  "main": "dist/index.js",
+  "exports": {
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.js"
+  },
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch --onSuccess \"node dist/index.js\"",
@@ -12,5 +27,6 @@
   "devDependencies": {
     "tsup": "^8.0.1",
     "typescript": "^5.3.2"
-  }
+  },
+  "sideEffects": false
 }

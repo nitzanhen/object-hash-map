@@ -4,10 +4,14 @@
     "target": "esnext",
 
     "rootDir": "src",
-    "outDir": "build",
+    "outDir": "dist",
 
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
-  }
+  },
+  "include": [
+    "src"
+  ],
 }

@@ -1,4 +1,4 @@
 
-export function equals<T>(a: T, b: T): boolean {
+export function equals(a: unknown, b: unknown): boolean {
   return a === b;
 }

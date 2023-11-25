@@ -1,9 +1,11 @@
-import { equals } from './equals';
-import { hash } from './hash';
+import { equals as defaultEquals } from './equals';
+import { hash as defaultHash } from './hash';
 
 export interface ObjectMapOptions {
   initialCapacity?: number;
   loadFactor?: number;
+  equals?: (a: unknown, b: unknown) => boolean;
+  hash?: (value: unknown) => number;
 }
 
 interface ObjectMapNode<K, V> {
@@ -21,9 +23,14 @@ export class ObjectMap<K, V> {
   protected loadFactor;
   protected _size;
 
+  protected equals: (a: unknown, b: unknown) => boolean;
+  protected _hash: (value: unknown) => number;
+
   constructor({
     initialCapacity = 32,
-    loadFactor = 0.75
+    loadFactor = 0.75,
+    equals = defaultEquals,
+    hash = defaultHash
   }: ObjectMapOptions = {}) {
     this.buckets = new Array(initialCapacity);
     this.first = null;
@@ -31,6 +38,9 @@ export class ObjectMap<K, V> {
 
     this.loadFactor = loadFactor;
     this._size = 0;
+
+    this.equals = equals;
+    this._hash = hash;
   }
 
   get size() {
@@ -42,7 +52,7 @@ export class ObjectMap<K, V> {
   }
 
   protected hash(key: K, capacity = this.capacity) {
-    return hash(key) % capacity;
+    return this._hash(key) % capacity;
   }
 
   protected resize(capacity: number) {
@@ -63,7 +73,7 @@ export class ObjectMap<K, V> {
     const bucket = this.buckets[h] ?? [];
     for (let i = 0; i < bucket.length; i++) {
       const { key: k } = bucket[i];
-      if (equals(key, k)) {
+      if (this.equals(key, k)) {
         // `bucket` is not empty, and the key exists in the map. Replace & return
         bucket[i].value = value;
         return;
@@ -105,7 +115,7 @@ export class ObjectMap<K, V> {
     }
 
     for (const entry of bucket) {
-      if (equals(key, entry.key)) {
+      if (this.equals(key, entry.key)) {
         return entry;
       }
     }
@@ -126,7 +136,7 @@ export class ObjectMap<K, V> {
 
     for (let i = 0; i < bucket.length; i++) {
       const { key: k, value } = bucket[i];
-      if (equals(key, k)) {
+      if (this.equals(key, k)) {
         bucket.splice(i, 1);
         this._size--;
         return value;
@@ -145,7 +155,7 @@ export class ObjectMap<K, V> {
       return false
     }
 
-    return bucket.some(({ key: k }) => equals(key, k));
+    return bucket.some(({ key: k }) => this.equals(key, k));
   }
 
   clear(): void {

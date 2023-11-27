@@ -70,7 +70,10 @@ export class ObjectMap<K, V> {
 
   set(key: K, value: V): void {
     const h = this.hash(key);
-    const bucket = this.buckets[h] ?? [];
+    if (!this.buckets[h]) {
+      this.buckets[h] = [];
+    }
+    const bucket = this.buckets[h]!;
     for (let i = 0; i < bucket.length; i++) {
       const { key: k } = bucket[i];
       if (this.equals(key, k)) {
@@ -99,6 +102,8 @@ export class ObjectMap<K, V> {
       const node = this.getNode(this.last)!;
       node.next = key;
     }
+    this.last = key;
+
     // And if this is the first element, update `this.first`
     if (this.first === null) {
       this.first = key;
@@ -147,6 +152,12 @@ export class ObjectMap<K, V> {
           const nextNode = this.getNode(next)!;
           nextNode.prev = prev;
         }
+        if (this.equals(this.first, key)) {
+          this.first = next;
+        }
+        if (this.equals(this.last, key)) {
+          this.last = prev;
+        }
         return value;
       }
     }
@@ -169,6 +180,8 @@ export class ObjectMap<K, V> {
   clear(): void {
     this.buckets = new Array(this.buckets.length);
     this._size = 0;
+    this.first = null;
+    this.last = null;
   }
 
 

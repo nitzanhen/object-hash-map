@@ -1,6 +1,6 @@
 {
-  "name": "@nh/objectmap",
-  "version": "0.1.0",
+  "name": "@nitzanhen/objectmap",
+  "version": "1.0.0-beta.1",
   "description": "A HashMap for the modern Javascript world",
   "keywords": [
     "map",

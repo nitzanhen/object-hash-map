@@ -1,7 +1,7 @@
 {
-  "name": "objectmap",
+  "name": "@nh/objectmap",
   "version": "0.1.0",
-  "description": "A TypeScript Map implementation that compares keys by data ",
+  "description": "A HashMap for the modern Javascript world",
   "keywords": [
     "map",
     "hashmap",
@@ -31,7 +31,8 @@
     "build": "tsup",
     "dev": "tsup --watch --onSuccess \"node dist/index.js\"",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "preversion": "yarn build && yarn test"
   },
   "devDependencies": {
     "tsup": "^8.0.1",

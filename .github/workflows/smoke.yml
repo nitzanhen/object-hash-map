@@ -1,0 +1,26 @@
+name: Main branch CI
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      - name: Test
+        run: yarn test
+
+      - name: Test coverage
+        uses: codecov/codecov-action@v2
+        with:
+          verbose: true
+          if_ci_failed: ignore

@@ -57,15 +57,15 @@ export class ObjectMap<K, V> implements Map<K, V> {
     }
   }
 
-  get size() {
+  get size(): number {
     return this._size;
   }
 
-  get capacity() {
+  get capacity(): number {
     return this.buckets.length;
   }
 
-  get options() {
+  get options(): Omit<ObjectMapOptions, 'initialCapacity'> {
     return {
       loadFactor: this.loadFactor,
       equals: this._equals,
@@ -73,11 +73,11 @@ export class ObjectMap<K, V> implements Map<K, V> {
     };
   }
 
-  protected hash(key: K, capacity = this.capacity) {
+  protected hash(key: K, capacity = this.capacity): number {
     return this._hash(key) % capacity;
   }
 
-  protected resize(capacity: number) {
+  protected resize(capacity: number): void {
     const buckets = new Array(capacity);
     for (const node of this.nodes()) {
       const h = this.hash(node.key, capacity);
@@ -245,11 +245,11 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return 'ObjectMap';
   };
 
-  clone() {
+  clone(): ObjectMap<K, V> {
     return new ObjectMap(this);
   }
 
-  emptyClone<W = V>() {
+  emptyClone<W = V>(): ObjectMap<K, W> {
     return new ObjectMap<K, W>(undefined, {
       initialCapacity: this.capacity,
       ...this.options

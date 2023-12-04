@@ -8,11 +8,11 @@ export class ImmutableMap<K, V> {
     this._map = new ObjectMap(iterable, options);
   }
 
-  get size() {
+  get size(): number {
     return this._map.size;
   }
 
-  get capacity() {
+  get capacity(): number {
     return this._map.capacity;
   }
 
@@ -62,7 +62,7 @@ export class ImmutableMap<K, V> {
     return 'ImmutableMap';
   };
 
-  clone() {
+  clone(): ImmutableMap<K, V> {
     return new ImmutableMap(this._map);
   }
 
@@ -112,7 +112,7 @@ export class ImmutableMap<K, V> {
     set: SetLike<K>,
     factory: (key: K) => V,
     options: ObjectMapOptions = {}
-  ) {
+  ): ImmutableMap<K, V> {
     return new ImmutableMap<K, V>(ObjectMap.fromSet(set, factory, options));
   }
 }

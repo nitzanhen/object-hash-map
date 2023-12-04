@@ -16,7 +16,7 @@ export class ObjectSet<T> implements Set<T> {
     );
   }
 
-  get size() {
+  get size(): number {
     return this._map.size;
   }
 
@@ -25,7 +25,7 @@ export class ObjectSet<T> implements Set<T> {
     return this;
   }
 
-  has(value: T) {
+  has(value: T): boolean {
     return this._map.has(value);
   }
 
@@ -33,7 +33,7 @@ export class ObjectSet<T> implements Set<T> {
     return this._map.delete(value)
   }
 
-  clear() {
+  clear(): void {
     this._map.clear();
   }
 
@@ -58,11 +58,11 @@ export class ObjectSet<T> implements Set<T> {
     return 'ObjectSet';
   }
 
-  clone() {
+  clone(): ObjectSet<T> {
     return new ObjectSet(this);
   }
 
-  emptyClone<S = T>() {
+  emptyClone<S = T>(): ObjectSet<S> {
     return new ObjectSet<S>(undefined, {
       initialCapacity: this.size,
       ...this._map.options
@@ -105,15 +105,16 @@ export class ObjectSet<T> implements Set<T> {
     return true;
   }
 
-  sort(compareFn?: (a: T, b: T) => number) {
+  sort(compareFn?: (a: T, b: T) => number): this {
     this._map.sort(compareFn && (([a], [b]) => compareFn(a, b)));
+    return this;
   }
 
-  isEmpty() {
+  isEmpty(): boolean {
     return this.size === 0;
   }
 
-  equals(other: ObjectSet<T>) {
+  equals(other: ObjectSet<T>): boolean {
     return this._map.equals(other._map);
   }
 

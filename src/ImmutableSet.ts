@@ -8,7 +8,7 @@ export class ImmutableSet<T> {
     this._set = new ObjectSet(iterable, options);
   }
 
-  get size() {
+  get size(): number {
     return this._set.size;
   }
 
@@ -55,7 +55,7 @@ export class ImmutableSet<T> {
     return 'ImmutableSet';
   }
 
-  clone() {
+  clone(): ImmutableSet<T> {
     return new ImmutableSet(this._set);
   }
 

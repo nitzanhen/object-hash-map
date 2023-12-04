@@ -7,11 +7,6 @@ export interface ObjectMapOptions {
   equals?: (a: unknown, b: unknown) => boolean;
   hash?: (value: unknown) => number;
 }
-export interface ObjectMapCappedOptions {
-  initialCapacity: number;
-  equals?: (a: unknown, b: unknown) => boolean;
-  hash?: (value: unknown) => number;
-}
 
 interface ObjectMapNode<K, V> {
   key: K;

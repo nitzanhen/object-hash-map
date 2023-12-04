@@ -25,9 +25,9 @@ describe('ObjectMap', () => {
     test('delete()', () => {
       const map = new ObjectMap<number, string>();
       map.set(1, 'a');
-      expect(map.delete(1)).toBe('a');
+      expect(map.delete(1)).toBe(true);
       expect(map.has(1)).toBe(false);
-      expect(map.delete(2)).toBe(undefined);
+      expect(map.delete(2)).toBe(false);
     })
 
     test('clear()', () => {
@@ -94,7 +94,7 @@ describe('ObjectMap', () => {
       expect([...map.entries()]).toEqual([['a', 'c'], ['b', 'b']]);
       expect(map.size).toBe(2);
 
-      expect(map.delete('a')).toBe('c');
+      expect(map.delete('a')).toBe(true);
       expect(map.has('a')).toBe(false);
 
       expect([...map.entries()]).toEqual([['b', 'b']]);
@@ -136,9 +136,9 @@ describe('ObjectMap', () => {
     test('delete()', () => {
       const map = new ObjectMap<{ a: number }, string>();
       map.set({ a: 1 }, 'a');
-      expect(map.delete({ a: 1 })).toBe('a');
+      expect(map.delete({ a: 1 })).toBe(true);
       expect(map.has({ a: 1 })).toBe(false);
-      expect(map.delete({ a: 2 })).toBe(undefined);
+      expect(map.delete({ a: 2 })).toBe(false);
     })
 
     test('clear()', () => {
@@ -205,7 +205,7 @@ describe('ObjectMap', () => {
       expect([...map.entries()]).toEqual([[{ a: 1 }, 'c'], [{ a: 2 }, 'b']]);
       expect(map.size).toBe(2);
 
-      expect(map.delete({ a: 1 })).toBe('c');
+      expect(map.delete({ a: 1 })).toBe(true);
       expect(map.has({ a: 1 })).toBe(false);
 
       expect([...map.entries()]).toEqual([[{ a: 2 }, 'b']]);

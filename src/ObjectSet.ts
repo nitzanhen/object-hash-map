@@ -105,8 +105,8 @@ export class ObjectSet<T> implements Set<T> {
     return true;
   }
 
-  sort() {
-    this._map.sort();
+  sort(compareFn?: (a: T, b: T) => number) {
+    this._map.sort(compareFn && (([a], [b]) => compareFn(a, b)));
   }
 
   isEmpty() {

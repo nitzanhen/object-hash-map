@@ -302,9 +302,9 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return true;
   }
 
-  sort(compare?: (a: [K, V], b: [K, V]) => number): this {
+  sort(compareFn?: (a: [K, V], b: [K, V]) => number): this {
     const nodes = [...this.nodes()];
-    nodes.sort(compare && ((a, b) => compare([a.key, a.value], [b.key, b.value])));
+    nodes.sort(compareFn && ((a, b) => compareFn([a.key, a.value], [b.key, b.value])));
 
     // After sort, rewrite the order
     this.first = nodes[0].key;
@@ -343,8 +343,8 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return value;
   }
 
-  update(key: K, updater: (value: V | undefined) => V): this {
-    this.set(key, updater(this.get(key)));
+  update(key: K, updater: (value: V | undefined, key: K) => V): this {
+    this.set(key, updater(this.get(key), key));
     return this;
   }
 

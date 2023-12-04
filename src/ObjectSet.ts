@@ -3,8 +3,8 @@ import { ObjectMap, ObjectMapOptions } from './ObjectMap';
 export class ObjectSet<T> {
   protected map: ObjectMap<T, true>;
 
-  constructor(options: ObjectMapOptions = {}) {
-    this.map = new ObjectMap(options);
+  constructor(iterable?: Iterable<T>, options: ObjectMapOptions = {}) {
+    this.map = new ObjectMap(toMapIterable(iterable), options);
   }
 
   get size() {
@@ -29,5 +29,17 @@ export class ObjectSet<T> {
 
   *values() {
     yield* this.map.keys();
+  }
+}
+
+/**
+ * Turns a "set" iterator to a "map" iterator by putting each value into a tuple, with the value as `true`.
+ */
+function* toMapIterable<T>(iterable?: Iterable<T>): Iterable<[T, true]> {
+  if (!iterable) {
+    return undefined;
+  }
+  for (const value of iterable) {
+    yield [value, true];
   }
 }

@@ -7,6 +7,11 @@ export interface ObjectMapOptions {
   equals?: (a: unknown, b: unknown) => boolean;
   hash?: (value: unknown) => number;
 }
+export interface ObjectMapCappedOptions {
+  initialCapacity: number;
+  equals?: (a: unknown, b: unknown) => boolean;
+  hash?: (value: unknown) => number;
+}
 
 interface ObjectMapNode<K, V> {
   key: K;
@@ -20,27 +25,40 @@ export class ObjectMap<K, V> implements Map<K, V> {
   protected first: K | null;
   protected last: K | null;
 
-  protected loadFactor;
-  protected _size;
+  protected loadFactor: number;
+  protected _size: number;
 
   protected equals: (a: unknown, b: unknown) => boolean;
   protected _hash: (value: unknown) => number;
 
-  constructor({
-    initialCapacity = 32,
-    loadFactor = 0.75,
-    equals = defaultEquals,
-    hash = defaultHash
-  }: ObjectMapOptions = {}) {
-    this.buckets = new Array(initialCapacity);
+  constructor(iterable?: Iterable<[K, V]>, options: ObjectMapOptions = {}) {
+    const initialCapacity = options.initialCapacity
+      || (iterable && 'size' in iterable && iterable.size as number)
+      || (iterable && 'length' in iterable && iterable.length as number)
+      || 32;
+
+    if (iterable instanceof ObjectMap) {
+      this.buckets = new Array(iterable.capacity);
+      this.loadFactor = iterable.loadFactor;
+      this.equals = iterable.equals;
+      this._hash = iterable._hash;
+    } else {
+
+      this.buckets = new Array(initialCapacity);
+      this.loadFactor = options.loadFactor ?? 0.75;
+      this.equals = options.equals ?? defaultEquals;
+      this._hash = options.hash ?? defaultHash;
+    }
+
     this.first = null;
     this.last = null;
-
-    this.loadFactor = loadFactor;
     this._size = 0;
 
-    this.equals = equals;
-    this._hash = hash;
+    if (iterable) {
+      for (const [key, value] of iterable) {
+        this.set(key, value);
+      }
+    }
   }
 
   get size() {
@@ -185,7 +203,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
   }
 
 
-  protected *nodes(): Generator<ObjectMapNode<K, V>> {
+  protected * nodes(): Generator<ObjectMapNode<K, V>> {
     let k = this.first;
     while (k !== null) {
       const node = this.getNode(k)!;
@@ -194,20 +212,20 @@ export class ObjectMap<K, V> implements Map<K, V> {
     }
   }
 
-  *entries(): Generator<[K, V]> {
+  * entries(): Generator<[K, V]> {
     for (const { key, value } of this.nodes()) {
       yield [key, value];
     }
   }
   [Symbol.iterator] = this.entries;
 
-  *keys(): Generator<K> {
+  * keys(): Generator<K> {
     for (const { key } of this.nodes()) {
       yield key;
     }
   }
 
-  *values(): Generator<V> {
+  * values(): Generator<V> {
     for (const { value } of this.nodes()) {
       yield value;
     }
@@ -222,4 +240,19 @@ export class ObjectMap<K, V> implements Map<K, V> {
   get [Symbol.toStringTag]() {
     return 'ObjectMap';
   };
+
+  clone(): ObjectMap<K, V> {
+    const map = new ObjectMap<K, V>(undefined, {
+      initialCapacity: this.capacity,
+      loadFactor: this.loadFactor,
+      equals: this.equals,
+      hash: this._hash,
+    });
+
+    for (const [key, value] of this.entries()) {
+      map.set(key, value);
+    }
+
+    return map;
+  }
 }

@@ -61,8 +61,4 @@ export class ImmutableMap<K, V> {
   get [Symbol.toStringTag]() {
     return 'ImmutableMap';
   };
-
-  clone(): ImmutableMap<K, V> {
-    return new ImmutableMap(this.map);
-  }
 }

@@ -13,7 +13,7 @@ export class ImmutableSet<T> {
   }
 
   add(value: T): ImmutableSet<T> {
-    const set = this.set.clone();
+    const set = new ObjectSet(this.set);
     set.add(value);
     return new ImmutableSet(set);
   }
@@ -23,15 +23,23 @@ export class ImmutableSet<T> {
   }
 
   delete(value: T): ImmutableSet<T> {
-    const set = this.set.clone();
+    const set = new ObjectSet(this.set);
     set.delete(value);
     return new ImmutableSet(set);
   }
 
   clear(): ImmutableSet<T> {
-    const set = this.set.clone();
+    const set = new ObjectSet(this.set);
     set.clear();
     return new ImmutableSet(set);
+  }
+
+  *entries(): Iterable<[T, T]> {
+    yield* this.set.entries();
+  }
+
+  *keys(): Iterable<T> {
+    yield* this.set.keys();
   }
 
   *values(): Iterable<T> {
@@ -39,7 +47,7 @@ export class ImmutableSet<T> {
   }
   [Symbol.iterator] = this.values;
 
-  clone(): ImmutableSet<T> {
-    return new ImmutableSet(this.set);
+  forEach(callbackfn: (value: T, key: T, set: Set<T>) => void, thisArg?: any): void {
+    this.set.forEach(callbackfn, thisArg);
   }
 }

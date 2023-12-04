@@ -1,7 +1,7 @@
 import { ObjectMap, ObjectMapOptions } from './ObjectMap';
 
-export class ObjectSet<T> {
-  protected map: ObjectMap<T, true>;
+export class ObjectSet<T> implements Set<T> {
+  protected map: ObjectMap<T, T>;
 
   constructor(iterable?: Iterable<T>, options: ObjectMapOptions = {}) {
     this.map = new ObjectMap(
@@ -14,8 +14,9 @@ export class ObjectSet<T> {
     return this.map.size;
   }
 
-  add(value: T) {
-    this.map.set(value, true);
+  add(value: T): this {
+    this.map.set(value, value);
+    return this;
   }
 
   has(value: T) {
@@ -23,31 +24,43 @@ export class ObjectSet<T> {
   }
 
   delete(value: T): boolean {
-    return !!this.map.delete(value)
+    return this.map.delete(value)
   }
 
   clear() {
     this.map.clear();
   }
 
-  *values() {
+  *entries(): IterableIterator<[T, T]> {
+    yield* this.map.entries();
+  }
+
+  *keys(): IterableIterator<T> {
     yield* this.map.keys();
+  }
+
+  *values(): IterableIterator<T> {
+    yield* this.map.values();
   }
   [Symbol.iterator] = this.values;
 
-  clone() {
-    return new ObjectSet(this);
+  forEach(callbackfn: (value: T, key: T, set: ObjectSet<T>) => void, thisArg?: any): void {
+    this.map.forEach((v, k) => callbackfn(v, k, this), thisArg);
+  }
+
+  get [Symbol.toStringTag]() {
+    return 'ObjectSet';
   }
 }
 
 /**
- * Turns a "set" iterator to a "map" iterator by putting each value into a tuple, with the value as `true`.
+ * Turns a "set" iterator to a "map" iterator by doubling each value into a tuple.
  */
-function* toMapIterable<T>(iterable?: Iterable<T>): Iterable<[T, true]> {
+function* toMapIterable<T>(iterable?: Iterable<T>): Iterable<[T, T]> {
   if (!iterable) {
     return undefined;
   }
   for (const value of iterable) {
-    yield [value, true];
+    yield [value, value];
   }
 }

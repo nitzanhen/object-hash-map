@@ -1,5 +1,5 @@
 {
-  "name": "@nitzanhen/objectmap",
+  "name": "object-hash-map",
   "version": "1.0.0-beta.1",
   "description": "A HashMap for the modern Javascript world",
   "keywords": [
@@ -10,11 +10,11 @@
     "data-structures"
   ],
   "bugs": {
-    "url": "https://github.com/nitzanhen/objectmap/issues"
+    "url": "https://github.com/nitzanhen/object-hash-map/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nitzanhen/objectmap"
+    "url": "https://github.com/nitzanhen/object-hash-map"
   },
   "license": "MIT",
   "author": "nitzanhen",

@@ -1,5 +1,6 @@
 import { equals as defaultEquals } from './equals';
 import { hash as defaultHash } from './hash';
+import type { SetLike } from './ObjectSet';
 
 export interface ObjectMapOptions {
   initialCapacity?: number;
@@ -23,7 +24,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
   protected loadFactor: number;
   protected _size: number;
 
-  protected equals: (a: unknown, b: unknown) => boolean;
+  protected _equals: (a: unknown, b: unknown) => boolean;
   protected _hash: (value: unknown) => number;
 
   constructor(iterable?: Iterable<[K, V]>, options: ObjectMapOptions = {}) {
@@ -35,13 +36,13 @@ export class ObjectMap<K, V> implements Map<K, V> {
     if (iterable instanceof ObjectMap) {
       this.buckets = new Array(iterable.capacity);
       this.loadFactor = iterable.loadFactor;
-      this.equals = iterable.equals;
+      this._equals = iterable._equals;
       this._hash = iterable._hash;
     }
     else {
       this.buckets = new Array(initialCapacity);
       this.loadFactor = options.loadFactor ?? 0.75;
-      this.equals = options.equals ?? defaultEquals;
+      this._equals = options.equals ?? defaultEquals;
       this._hash = options.hash ?? defaultHash;
     }
 
@@ -62,6 +63,14 @@ export class ObjectMap<K, V> implements Map<K, V> {
 
   get capacity() {
     return this.buckets.length;
+  }
+
+  get options() {
+    return {
+      loadFactor: this.loadFactor,
+      equals: this._equals,
+      hash: this._hash
+    };
   }
 
   protected hash(key: K, capacity = this.capacity) {
@@ -89,7 +98,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
     const bucket = this.buckets[h]!;
     for (let i = 0; i < bucket.length; i++) {
       const { key: k } = bucket[i];
-      if (this.equals(key, k)) {
+      if (this._equals(key, k)) {
         // `bucket` is not empty, and the key exists in the map. Replace & return
         bucket[i].value = value;
         return this;
@@ -133,7 +142,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
     }
 
     for (const entry of bucket) {
-      if (this.equals(key, entry.key)) {
+      if (this._equals(key, entry.key)) {
         return entry;
       }
     }
@@ -154,7 +163,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
 
     for (let i = 0; i < bucket.length; i++) {
       const { key: k, value, prev, next } = bucket[i];
-      if (this.equals(key, k)) {
+      if (this._equals(key, k)) {
         bucket.splice(i, 1);
         this._size--;
         if (prev !== null) {
@@ -165,10 +174,10 @@ export class ObjectMap<K, V> implements Map<K, V> {
           const nextNode = this.getNode(next)!;
           nextNode.prev = prev;
         }
-        if (this.equals(this.first, key)) {
+        if (this._equals(this.first, key)) {
           this.first = next;
         }
-        if (this.equals(this.last, key)) {
+        if (this._equals(this.last, key)) {
           this.last = prev;
         }
         return true;
@@ -187,7 +196,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
       return false
     }
 
-    return bucket.some(({ key: k }) => this.equals(key, k));
+    return bucket.some(({ key: k }) => this._equals(key, k));
   }
 
   clear(): void {
@@ -235,4 +244,119 @@ export class ObjectMap<K, V> implements Map<K, V> {
   get [Symbol.toStringTag]() {
     return 'ObjectMap';
   };
+
+  clone() {
+    return new ObjectMap(this);
+  }
+
+  emptyClone<W = V>() {
+    return new ObjectMap<K, W>(undefined, {
+      initialCapacity: this.capacity,
+      ...this.options
+    });
+  }
+
+  filter(predicate: (value: V, key: K) => boolean): ObjectMap<K, V> {
+    const map = this.emptyClone();
+    for (const [key, value] of this.entries()) {
+      if (predicate(value, key)) {
+        map.set(key, value);
+      }
+    }
+
+    return map;
+  }
+
+  map<W>(transform: (value: V, key: K) => W): ObjectMap<K, W> {
+    const map = this.emptyClone<W>();
+    for (const [key, value] of this.entries()) {
+      map.set(key, transform(value, key));
+    }
+
+    return map;
+  }
+
+  reduce<A>(reducer: (accumulator: A, value: V, key: K) => A, initialValue: A): A {
+    let accumulator = initialValue;
+    for (const [key, value] of this.entries()) {
+      accumulator = reducer(accumulator, value, key);
+    }
+    return accumulator;
+  }
+
+  some(predicate: (value: V, key: K) => boolean): boolean {
+    for (const [key, value] of this.entries()) {
+      if (predicate(value, key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  every(predicate: (value: V, key: K) => boolean): boolean {
+    for (const [key, value] of this.entries()) {
+      if (!predicate(value, key)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  sort(compare?: (a: [K, V], b: [K, V]) => number): this {
+    const nodes = [...this.nodes()];
+    nodes.sort(compare && ((a, b) => compare([a.key, a.value], [b.key, b.value])));
+
+    // After sort, rewrite the order
+    this.first = nodes[0].key;
+    this.last = nodes[nodes.length - 1].key;
+
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      node.prev = i === 0 ? null : nodes[i - 1].key;
+      node.next = i === nodes.length - 1 ? null : nodes[i + 1].key;
+    }
+
+    return this;
+  }
+
+  isEmpty(): boolean {
+    return this.size === 0;
+  }
+
+  equals(other: ObjectMap<K, V>): boolean {
+    if (this.size !== other.size) {
+      return false;
+    }
+
+    for (const [key, value] of this.entries()) {
+      if (!other.has(key) || !this._equals(value, other.get(key)!)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  pop(key: K): V | undefined {
+    const value = this.get(key);
+    this.delete(key);
+    return value;
+  }
+
+  update(key: K, updater: (value: V | undefined) => V): this {
+    this.set(key, updater(this.get(key)));
+    return this;
+  }
+
+  static fromSet<K, V>(
+    set: SetLike<K>,
+    factory: (key: K) => V,
+    options: ObjectMapOptions = {}
+  ): ObjectMap<K, V> {
+    const map = new ObjectMap<K, V>(undefined, options);
+    for (const key of set.keys()) {
+      map.set(key, factory(key));
+    }
+    return map;
+  }
 }

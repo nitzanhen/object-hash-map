@@ -16,7 +16,7 @@ export class ImmutableMap<K, V> {
   }
 
   set(key: K, value: V): ImmutableMap<K, V> {
-    const map = this.map.clone();
+    const map = new ObjectMap(this.map);
     map.set(key, value);
     return new ImmutableMap(map);
   }
@@ -26,7 +26,7 @@ export class ImmutableMap<K, V> {
   }
 
   delete(key: K): ImmutableMap<K, V> {
-    const map = this.map.clone();
+    const map = new ObjectMap(this.map);
     map.delete(key);
     return new ImmutableMap(map);
   }
@@ -36,7 +36,7 @@ export class ImmutableMap<K, V> {
   }
 
   clear(): ImmutableMap<K, V> {
-    const map = this.map.clone();
+    const map = new ObjectMap(this.map);
     map.clear();
     return new ImmutableMap(map);
   }
@@ -63,6 +63,6 @@ export class ImmutableMap<K, V> {
   };
 
   clone(): ImmutableMap<K, V> {
-    return new ImmutableMap(this.map.clone());
+    return new ImmutableMap(this.map);
   }
 }

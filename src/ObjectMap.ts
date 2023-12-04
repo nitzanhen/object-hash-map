@@ -37,8 +37,8 @@ export class ObjectMap<K, V> implements Map<K, V> {
       this.loadFactor = iterable.loadFactor;
       this.equals = iterable.equals;
       this._hash = iterable._hash;
-    } else {
-
+    }
+    else {
       this.buckets = new Array(initialCapacity);
       this.loadFactor = options.loadFactor ?? 0.75;
       this.equals = options.equals ?? defaultEquals;
@@ -235,19 +235,4 @@ export class ObjectMap<K, V> implements Map<K, V> {
   get [Symbol.toStringTag]() {
     return 'ObjectMap';
   };
-
-  clone(): ObjectMap<K, V> {
-    const map = new ObjectMap<K, V>(undefined, {
-      initialCapacity: this.capacity,
-      loadFactor: this.loadFactor,
-      equals: this.equals,
-      hash: this._hash,
-    });
-
-    for (const [key, value] of this.entries()) {
-      map.set(key, value);
-    }
-
-    return map;
-  }
 }

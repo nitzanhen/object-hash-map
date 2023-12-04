@@ -4,7 +4,10 @@ export class ObjectSet<T> {
   protected map: ObjectMap<T, true>;
 
   constructor(iterable?: Iterable<T>, options: ObjectMapOptions = {}) {
-    this.map = new ObjectMap(toMapIterable(iterable), options);
+    this.map = new ObjectMap(
+      iterable instanceof ObjectSet ? iterable.map : toMapIterable(iterable),
+      options
+    );
   }
 
   get size() {
@@ -29,6 +32,11 @@ export class ObjectSet<T> {
 
   *values() {
     yield* this.map.keys();
+  }
+  [Symbol.iterator] = this.values;
+
+  clone() {
+    return new ObjectSet(this);
   }
 }
 

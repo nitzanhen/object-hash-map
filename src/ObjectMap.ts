@@ -15,7 +15,7 @@ interface ObjectMapNode<K, V> {
   next: K | null;
 }
 
-export class ObjectMap<K, V> {
+export class ObjectMap<K, V> implements Map<K, V> {
   protected buckets: Array<ObjectMapNode<K, V>[] | undefined>;
   protected first: K | null;
   protected last: K | null;
@@ -68,7 +68,7 @@ export class ObjectMap<K, V> {
     this.buckets = buckets;
   }
 
-  set(key: K, value: V): void {
+  set(key: K, value: V): this {
     const h = this.hash(key);
     if (!this.buckets[h]) {
       this.buckets[h] = [];
@@ -79,7 +79,7 @@ export class ObjectMap<K, V> {
       if (this.equals(key, k)) {
         // `bucket` is not empty, and the key exists in the map. Replace & return
         bucket[i].value = value;
-        return;
+        return this;
       }
     }
 
@@ -109,7 +109,7 @@ export class ObjectMap<K, V> {
       this.first = key;
     }
 
-    return;
+    return this;
   }
 
   protected getNode(key: K): ObjectMapNode<K, V> | undefined {
@@ -132,11 +132,11 @@ export class ObjectMap<K, V> {
     return this.getNode(key)?.value;
   }
 
-  delete(key: K): V | undefined {
+  delete(key: K): boolean {
     const h = this.hash(key);
     const bucket = this.buckets[h];
     if (!bucket) {
-      return undefined;
+      return false;
     }
 
     for (let i = 0; i < bucket.length; i++) {
@@ -158,12 +158,12 @@ export class ObjectMap<K, V> {
         if (this.equals(this.last, key)) {
           this.last = prev;
         }
-        return value;
+        return true;
       }
     }
 
     // Key is not in the map
-    return undefined;
+    return false;
   }
 
   has(key: K): boolean {
@@ -199,6 +199,7 @@ export class ObjectMap<K, V> {
       yield [key, value];
     }
   }
+  [Symbol.iterator] = this.entries;
 
   *keys(): Generator<K> {
     for (const { key } of this.nodes()) {
@@ -211,4 +212,14 @@ export class ObjectMap<K, V> {
       yield value;
     }
   }
+
+  forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void {
+    for (const [key, value] of this.entries()) {
+      callbackfn.call(thisArg, value, key, this);
+    }
+  }
+
+  get [Symbol.toStringTag]() {
+    return 'ObjectMap';
+  };
 }

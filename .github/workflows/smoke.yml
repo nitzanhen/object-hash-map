@@ -2,9 +2,9 @@ name: Main branch CI
 
 on:
   push:
-    branches: main
+    branches: [main]
   pull_request:
-    branches: main
+    branches: [main]
 
 jobs:
   CI:
@@ -18,9 +18,3 @@ jobs:
 
       - name: Test
         run: yarn test
-
-      - name: Test coverage
-        uses: codecov/codecov-action@v2
-        with:
-          verbose: true
-          if_ci_failed: ignore

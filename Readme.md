@@ -307,7 +307,7 @@ Executes a provided function once per each member in the set, in insertion order
 Creates a clone of the set; does not create a deep copy of the members.
 `set.clone()` is equivalent to `new ObjectSet(set)`.
 
-#### ` emptyClone<S = T>(): ObjectSet<S>`
+#### `emptyClone<S = T>(): ObjectSet<S>`
 Returns a new set with the same options as this but no keys or values.
 
 #### `filter(predicate: (value: T) => boolean): ObjectSet<T>`

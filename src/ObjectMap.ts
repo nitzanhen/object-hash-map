@@ -2,13 +2,33 @@ import { equals as defaultEquals } from './equals';
 import { hash as defaultHash } from './hash';
 import type { SetLike } from './ObjectSet';
 
+/**
+ * Constructor options for the `ObjectMap`, `ObjectSet`, `ImmutableMap` and `ImmutableSet` classes.
+ */
 export interface ObjectMapOptions {
+  /**
+   * The initial capacity of the map; defaults to `32`.
+   * For a map with constant capacity, set this together with `loadFactor=1`
+   */
   initialCapacity?: number;
+  /** 
+   * The threshold above which the map will resize; defaults to `0.75`.
+   * For a map that never resizes, set this to `1`.
+   */
   loadFactor?: number;
+  /**
+   * The function used to compare keys for equality; defaults to a deep equality function (exported as `equals`).
+   */
   equals?: (a: unknown, b: unknown) => boolean;
+  /**
+   * The function used to hash keys; defaults to a deep hash function (exported as `hash`).
+   */
   hash?: (value: unknown) => number;
 }
 
+/**
+ * @interal - wraps stored values to keep track of order.
+ */
 interface ObjectMapNode<K, V> {
   key: K;
   value: V;
@@ -16,6 +36,10 @@ interface ObjectMapNode<K, V> {
   next: K | null;
 }
 
+/**
+ * A `Map` data structure that compares keys by value rather than by reference.
+ * @see https://github.com/nitzanhen/objectmap.js
+ */
 export class ObjectMap<K, V> implements Map<K, V> {
   protected buckets: Array<ObjectMapNode<K, V>[] | undefined>;
   protected first: K | null;
@@ -27,6 +51,12 @@ export class ObjectMap<K, V> implements Map<K, V> {
   protected _equals: (a: unknown, b: unknown) => boolean;
   protected _hash: (value: unknown) => number;
 
+  /**
+   * @param iterable an iterable of key-value pairs; used to initialize the map.  
+   * If this is an `ObjectMap`, this constructor will create a copy. 
+   * Otherwise, if the iterable has a `length` or `size` property - its value will be used as the initial capacity (can be overriden by `initialCapacity` in options). 
+   * @param options constructor options.
+   */
   constructor(iterable?: Iterable<[K, V]>, options: ObjectMapOptions = {}) {
     const initialCapacity = options.initialCapacity
       || (iterable && 'size' in iterable && iterable.size as number)
@@ -245,10 +275,17 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return 'ObjectMap';
   };
 
+  /**
+   * Creates a clone of the map; does not copy keys or values.
+   * `map.clone()` is equivalent to `new ObjectMap(map)`.
+   */
   clone(): ObjectMap<K, V> {
     return new ObjectMap(this);
   }
 
+  /**
+   * @returns a map with the same options but no keys or values.
+   */
   emptyClone<W = V>(): ObjectMap<K, W> {
     return new ObjectMap<K, W>(undefined, {
       initialCapacity: this.capacity,
@@ -256,6 +293,10 @@ export class ObjectMap<K, V> implements Map<K, V> {
     });
   }
 
+  /**
+   * @returns a map containing only the key-value pairs that satisfy the predicate.
+   * Retains the same options as the original map.
+   */
   filter(predicate: (value: V, key: K) => boolean): ObjectMap<K, V> {
     const map = this.emptyClone();
     for (const [key, value] of this.entries()) {
@@ -267,6 +308,10 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return map;
   }
 
+  /**
+   * Returns a map containing the same keys as the original, 
+   * and for each key - the result of the `transform` function called with it and the corresponding value.
+   */
   map<W>(transform: (value: V, key: K) => W): ObjectMap<K, W> {
     const map = this.emptyClone<W>();
     for (const [key, value] of this.entries()) {
@@ -276,6 +321,9 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return map;
   }
 
+  /**
+   * Reduces the map to a single value, by calling the `reducer` function for each key-value pair.
+   */
   reduce<A>(reducer: (accumulator: A, value: V, key: K) => A, initialValue: A): A {
     let accumulator = initialValue;
     for (const [key, value] of this.entries()) {
@@ -284,6 +332,10 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return accumulator;
   }
 
+  /**
+   * Returns `true` if the map contains a key-value pair that satisfies the predicate,
+   * and `false` otherwise.
+   */
   some(predicate: (value: V, key: K) => boolean): boolean {
     for (const [key, value] of this.entries()) {
       if (predicate(value, key)) {
@@ -293,6 +345,10 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return false;
   }
 
+  /**
+   * Returns `true` if every key-value pair in the map satisfies the predicate,
+   * and `false` otherwise.
+   */
   every(predicate: (value: V, key: K) => boolean): boolean {
     for (const [key, value] of this.entries()) {
       if (!predicate(value, key)) {
@@ -302,6 +358,10 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return true;
   }
 
+  /**
+   * Sorts the map in-place using the provided compare function.
+   * uses `Array.prototype.sort` under the hood.
+   */
   sort(compareFn?: (a: [K, V], b: [K, V]) => number): this {
     const nodes = [...this.nodes()];
     nodes.sort(compareFn && ((a, b) => compareFn([a.key, a.value], [b.key, b.value])));
@@ -319,10 +379,18 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return this;
   }
 
+  /**
+   * @returns `true` if the map is empty (of size `0`), and `false` otherwise.
+   */
   isEmpty(): boolean {
     return this.size === 0;
   }
 
+  /**
+   * @returns `true` if this map and the other map are equal;
+   * equality here is defined as having the same key sets, and the same values for each key.
+   * Equality is tested using the `equals` function provided in the constructor options.
+   */
   equals(other: ObjectMap<K, V>): boolean {
     if (this.size !== other.size) {
       return false;
@@ -337,17 +405,28 @@ export class ObjectMap<K, V> implements Map<K, V> {
     return true;
   }
 
+  /**
+   * Removes the value associated with the given key, and returns it.
+   * If the key is not in the map, returns `undefined`.
+   * This is like `delete`, except the `value` (or `undefined`) is returned.
+   */
   pop(key: K): V | undefined {
     const value = this.get(key);
     this.delete(key);
     return value;
   }
 
+  /**
+   * Updates the value associated with the given key, using the `updater` function.
+   * Note that if the key is not in the map, updater will be called with `undefined`.
+   * @returns this
+   */
   update(key: K, updater: (value: V | undefined, key: K) => V): this {
     this.set(key, updater(this.get(key), key));
     return this;
   }
 
+  /** Static factory for creating a map from a set-like object and a function. */
   static fromSet<K, V>(
     set: SetLike<K>,
     factory: (key: K) => V,

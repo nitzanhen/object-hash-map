@@ -80,7 +80,7 @@ export class ObjectSet<T> implements Set<T> {
   }
 
   /**
-   * @returns a set with the same options but no keys or values.
+   * @returns a set with the same options as this but no keys or values.
    */
   emptyClone<S = T>(): ObjectSet<S> {
     return new ObjectSet<S>(undefined, {
@@ -100,7 +100,7 @@ export class ObjectSet<T> implements Set<T> {
   }
 
   /**
-   * Calls `transform` for each member of the set, and collects the results into a new set.
+   * Returns a new set containing the results of calling `transform` on each member.
    */
   map<S>(transform: (value: T) => S): ObjectSet<S> {
     const set = this.emptyClone<S>();
@@ -111,7 +111,7 @@ export class ObjectSet<T> implements Set<T> {
   }
 
   /**
-   * Reduces the set to a single value, by calling the `reducer` function for each member.
+   * Calls `reducer` for each member, accumulating the results into a single value.
    */
   reduce<A>(reducer: (accumulator: A, value: T) => A, initialValue: A): A {
     return this._map.reduce(reducer, initialValue);
@@ -178,7 +178,7 @@ export class ObjectSet<T> implements Set<T> {
   }
 
   /**
-   * Returns a new set containing exactly the members that are either in this set, the other set or both.
+   * Returns a new set containing exactly the members that are either in this set, in `other` or both.
    */
   union(other: SetLike<T>): ObjectSet<T> {
     const set = this.clone();

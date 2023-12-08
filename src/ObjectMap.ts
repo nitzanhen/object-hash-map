@@ -53,7 +53,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
   protected _hash: (value: unknown) => number;
 
   /**
-   * @param iterable an iterable of key-value pairs; used to initialize the map.  
+   * @param iterable an iterable of key-value pairs, used to initialize the map.  
    * If this is an `ObjectMap`, this constructor will create a copy. 
    * Otherwise, if the iterable has a `length` or `size` property - its value will be used as the initial capacity (can be overriden by `initialCapacity` in options). 
    * @param options constructor options.
@@ -310,7 +310,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
   }
 
   /**
-   * Calls `transform` for each key-value pair in the map, and collects the results into a new map.
+   * Returns a new map with the same keys, and the results of calling `transform` for each key-value pair as values.
    */
   map<W>(transform: (value: V, key: K) => W): ObjectMap<K, W> {
     const map = this.emptyClone<W>();
@@ -387,7 +387,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
   }
 
   /**
-   * @returns `true` if this map and the other map are equal;
+   * @returns `true` if this map and the other map are equal, and `false` otherwise;
    * equality here is defined as having the same key sets, and the same values for each key.
    * Equality is tested using the `equals` function provided in the constructor options.
    */

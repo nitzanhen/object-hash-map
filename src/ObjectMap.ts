@@ -37,7 +37,8 @@ interface ObjectMapNode<K, V> {
 }
 
 /**
- * A `Map` data structure that compares keys by value rather than by reference.
+ * A Map data structure that compares keys by value rather than by reference.
+ * Compliant with the ES6 Map interface.
  * @see https://github.com/nitzanhen/objectmap.js
  */
 export class ObjectMap<K, V> implements Map<K, V> {
@@ -294,7 +295,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
   }
 
   /**
-   * @returns a map containing only the key-value pairs that satisfy the predicate.
+   * @returns a new map containing only the key-value pairs that satisfy the predicate.
    * Retains the same options as the original map.
    */
   filter(predicate: (value: V, key: K) => boolean): ObjectMap<K, V> {
@@ -309,8 +310,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
   }
 
   /**
-   * Returns a map containing the same keys as the original, 
-   * and for each key - the result of the `transform` function called with it and the corresponding value.
+   * Calls `transform` for each key-value pair in the map, and collects the results into a new map.
    */
   map<W>(transform: (value: V, key: K) => W): ObjectMap<K, W> {
     const map = this.emptyClone<W>();

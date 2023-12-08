@@ -240,6 +240,7 @@ export class ObjectSet<T> implements Set<T> {
    * Creates an `ObjectSet` from the keys of a `Map` (possibly an `ObjectMap`) or an object.
    */
   static keysOf = keysOf;
+
   /**
    * Creates an `ObjectSet` from the values of a `Map` (possibly an `ObjectMap`) or an object.
    */

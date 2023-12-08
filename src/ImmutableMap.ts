@@ -10,12 +10,15 @@ export class ImmutableMap<K, V> {
 
   /**
    * @param iterable an iterable of key-value pairs; used to initialize the map.  
-   * If this is an `ObjectMap`, this constructor will create a copy. 
+   * If this is an `ImmutableMap`, this constructor will create a copy. 
    * Otherwise, if the iterable has a `length` or `size` property - its value will be used as the initial capacity (can be overriden by `initialCapacity` in options). 
    * @param options constructor options.
    */
   constructor(iterable?: Iterable<[K, V]>, options?: ObjectMapOptions) {
-    this._map = new ObjectMap(iterable, options);
+    this._map = new ObjectMap(
+      iterable instanceof ImmutableMap ? iterable._map : iterable,
+      options
+    );
   }
 
   /** @returns — the number of elements in the Map. */
@@ -28,7 +31,7 @@ export class ImmutableMap<K, V> {
   }
 
   /**
-   * Returns a new `ImmutableMap` with the given value associated with the given key;
+   * Returns a new map with the given value associated with the given key;
    * if the key is already present in the map, the old value is replaced, otherwise it's added.
    */
   set(key: K, value: V): ImmutableMap<K, V> {
@@ -46,7 +49,7 @@ export class ImmutableMap<K, V> {
   }
 
   /**
-   * Returns a new `ImmutableMap` with the given key removed, if it was present.
+   * Returns a new map with the given key removed, if it was present.
    */
   delete(key: K): ImmutableMap<K, V> {
     const map = this._map.clone();
@@ -54,29 +57,30 @@ export class ImmutableMap<K, V> {
     return new ImmutableMap(map);
   }
 
-  /** @returns — boolean indicating whether an element with the specified key exists or not. */
+  /** @returns a boolean indicating whether an element with the specified key exists or not. */
   has(key: K): boolean {
     return this._map.has(key);
   }
 
+  /** Returns an empty clone of this map. */
   clear(): ImmutableMap<K, V> {
     const map = this._map.emptyClone();
     return new ImmutableMap(map);
   }
 
   /** Returns an iterable of key, value pairs for every entry in the map. */
-  *entries(): Iterable<[K, V]> {
+  *entries(): IterableIterator<[K, V]> {
     yield* this._map.entries();
   }
   [Symbol.iterator] = this.entries;
 
   /** Returns an iterable of keys in the map */
-  *keys(): Iterable<K> {
+  *keys(): IterableIterator<K> {
     yield* this._map.keys();
   }
 
   /** Returns an iterable of values in the map */
-  *values(): Iterable<V> {
+  *values(): IterableIterator<V> {
     yield* this._map.values();
   }
 
@@ -91,10 +95,10 @@ export class ImmutableMap<K, V> {
 
   /**
    * Creates a clone of the map; does not create a deep copy of keys or values.
-   * `map.clone()` is equivalent to `new ObjectMap(map)`.
+   * `map.clone()` is equivalent to `new ImmutableMap(map)`.
    */
   clone(): ImmutableMap<K, V> {
-    return new ImmutableMap(this._map);
+    return new ImmutableMap(this);
   }
 
   /**
@@ -138,12 +142,11 @@ export class ImmutableMap<K, V> {
   }
 
   /**
-   * Sorts the map in-place using the provided compare function.
+   * Returns a new map with the same keys, sorted by the given function.
    * uses `Array.prototype.sort` under the hood.
    */
   sort(compareFn?: (a: [K, V], b: [K, V]) => number): ImmutableMap<K, V> {
-    const map = this._map.clone();
-    map.sort(compareFn);
+    const map = this._map.clone().sort(compareFn);
     return new ImmutableMap(map);
   }
 

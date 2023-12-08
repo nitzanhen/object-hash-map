@@ -1,6 +1,6 @@
 {
   "name": "objectmap.js",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.3",
   "description": "A HashMap for the modern Javascript world",
   "keywords": [
     "map",

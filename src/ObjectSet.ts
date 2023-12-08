@@ -72,7 +72,7 @@ export class ObjectSet<T> implements Set<T> {
   }
 
   /**
-   * Creates a clone of the set; does not copy keys or values.
+   * Creates a clone of the set; does not create a deep copy of the members.
    * `set.clone()` is equivalent to `new ObjectSet(set)`.
    */
   clone(): ObjectSet<T> {

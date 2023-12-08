@@ -277,7 +277,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
   };
 
   /**
-   * Creates a clone of the map; does not copy keys or values.
+   * Creates a clone of the map; does not create a deep copy keys or values.
    * `map.clone()` is equivalent to `new ObjectMap(map)`.
    */
   clone(): ObjectMap<K, V> {

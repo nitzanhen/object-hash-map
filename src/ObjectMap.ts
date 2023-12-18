@@ -10,20 +10,20 @@ export interface ObjectMapOptions {
    * The initial capacity of the map; defaults to `32`.
    * For a map with constant capacity, set this together with `loadFactor=1`
    */
-  initialCapacity?: number;
+  initialCapacity: number;
   /** 
    * The threshold above which the map will resize; defaults to `0.75`.
    * For a map that never resizes, set this to `1`.
    */
-  loadFactor?: number;
+  loadFactor: number;
   /**
    * The function used to compare keys for equality; defaults to a deep equality function (exported as `equals`).
    */
-  equals?: (a: unknown, b: unknown) => boolean;
+  equals: (a: unknown, b: unknown) => boolean;
   /**
    * The function used to hash keys; defaults to a deep hash function (exported as `hash`).
    */
-  hash?: (value: unknown) => number;
+  hash: (value: unknown) => number;
 }
 
 /**
@@ -58,24 +58,26 @@ export class ObjectMap<K, V> implements Map<K, V> {
    * Otherwise, if the iterable has a `length` or `size` property - its value will be used as the initial capacity (can be overriden by `initialCapacity` in options). 
    * @param options constructor options.
    */
-  constructor(iterable?: Iterable<[K, V]>, options: ObjectMapOptions = {}) {
+  constructor(iterable?: Iterable<[K, V]>, options: Partial<ObjectMapOptions> = {}) {
     const initialCapacity = options.initialCapacity
+      || (iterable instanceof ObjectMap && iterable.capacity)
       || (iterable && 'size' in iterable && iterable.size as number)
       || (iterable && 'length' in iterable && iterable.length as number)
-      || 32;
+      || 16;
+    const loadFactor = options.loadFactor
+      || (iterable instanceof ObjectMap && iterable.loadFactor)
+      || 0.75;
+    const _equals = options.equals
+      || (iterable instanceof ObjectMap && iterable._equals)
+      || defaultEquals;
+    const _hash = options.hash
+      || (iterable instanceof ObjectMap && iterable._hash)
+      || defaultHash;
 
-    if (iterable instanceof ObjectMap) {
-      this.buckets = new Array(iterable.capacity);
-      this.loadFactor = iterable.loadFactor;
-      this._equals = iterable._equals;
-      this._hash = iterable._hash;
-    }
-    else {
-      this.buckets = new Array(initialCapacity);
-      this.loadFactor = options.loadFactor ?? 0.75;
-      this._equals = options.equals ?? defaultEquals;
-      this._hash = options.hash ?? defaultHash;
-    }
+    this.buckets = new Array(initialCapacity);
+    this.loadFactor = loadFactor;
+    this._equals = _equals;
+    this._hash = _hash;
 
     this.first = null;
     this.last = null;
@@ -115,7 +117,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
       if (!buckets[h]) {
         buckets[h] = [];
       }
-      buckets[h].push(node);
+      buckets[h].push({ ...node });
     }
 
     this.buckets = buckets;
@@ -145,11 +147,6 @@ export class ObjectMap<K, V> implements Map<K, V> {
     });
     this._size++;
 
-    // Resize if needed
-    if (this.size / this.capacity > this.loadFactor) {
-      this.resize(this.capacity * 2);
-    }
-
     // Update `this.last`
     if (this.last !== null) {
       const node = this.getNode(this.last)!;
@@ -161,6 +158,11 @@ export class ObjectMap<K, V> implements Map<K, V> {
     if (this.first === null) {
       this.first = key;
     }
+
+    // // Resize if needed
+    // if (this.size / this.capacity > this.loadFactor) {
+    //   this.resize(this.capacity * 2);
+    // }
 
     return this;
   }
@@ -430,7 +432,7 @@ export class ObjectMap<K, V> implements Map<K, V> {
   static fromSet<K, V>(
     set: SetLike<K>,
     factory: (key: K) => V,
-    options: ObjectMapOptions = {}
+    options: Partial<ObjectMapOptions> = {}
   ): ObjectMap<K, V> {
     const map = new ObjectMap<K, V>(undefined, options);
     for (const key of set.keys()) {

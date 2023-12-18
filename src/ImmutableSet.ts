@@ -13,7 +13,7 @@ export class ImmutableSet<T> {
    * If this is an `ImmutableSet`, this constructor will create a copy.
    * @param options constructor options.
    */
-  constructor(iterable?: Iterable<T>, options: ObjectMapOptions = {}) {
+  constructor(iterable?: Iterable<T>, options: Partial<ObjectMapOptions> = {}) {
     this._set = new ObjectSet(
       iterable instanceof ImmutableSet ? iterable._set : iterable,
       options
@@ -23,6 +23,10 @@ export class ImmutableSet<T> {
   /** @returns — the number of elements in the Set. */
   get size(): number {
     return this._set.size;
+  }
+
+  get options(): Omit<ObjectMapOptions, 'initialCapacity'> {
+    return this._set.options;
   }
 
   /**
@@ -207,27 +211,27 @@ export class ImmutableSet<T> {
    * Creates an `ImmutableSet` from the keys of a `Map` (possibly an `ObjectMap`) or an object.
    */
   static keysOf = keysOf;
-  
+
   /**
    * Creates an `ObjectSet` from the values of a `Map` (possibly an `ObjectMap`) or an object.
    */
   static valuesOf = valuesOf;
 }
 
-function keysOf<K>(map: Map<K, unknown>): ImmutableSet<K>;
-function keysOf<K extends string | number | symbol>(obj: Record<K, unknown>): ImmutableSet<K>;
-function keysOf(obj: Map<unknown, unknown> | Record<string | number | symbol, unknown>): ImmutableSet<unknown> {
+function keysOf<K>(map: Map<K, unknown>, options?: Partial<ObjectMapOptions>): ImmutableSet<K>;
+function keysOf<K extends string | number | symbol>(obj: Record<K, unknown>, options?: Partial<ObjectMapOptions>): ImmutableSet<K>;
+function keysOf(obj: Map<unknown, unknown> | Record<string | number | symbol, unknown>, options: Partial<ObjectMapOptions> = {}): ImmutableSet<unknown> {
   if ('keys' in obj && typeof obj.keys === 'function') {
-    return new ImmutableSet(obj.keys());
+    return new ImmutableSet(obj.keys(), options);
   }
-  return new ImmutableSet(Object.keys(obj));
+  return new ImmutableSet(Object.keys(obj), options);
 }
 
-function valuesOf<V>(map: Map<unknown, V>): ImmutableSet<V>;
-function valuesOf<V>(obj: Record<any, V>): ImmutableSet<V>;
-function valuesOf(obj: Map<unknown, unknown> | Record<any, unknown>): ImmutableSet<unknown> {
+function valuesOf<V>(map: Map<unknown, V>, options?: Partial<ObjectMapOptions>): ImmutableSet<V>;
+function valuesOf<V>(obj: Record<any, V>, options?: Partial<ObjectMapOptions>): ImmutableSet<V>;
+function valuesOf(obj: Map<unknown, unknown> | Record<any, unknown>, options: Partial<ObjectMapOptions> = {}): ImmutableSet<unknown> {
   if ('values' in obj && typeof obj.values === 'function') {
-    return new ImmutableSet(obj.values());
+    return new ImmutableSet(obj.values(), options);
   }
-  return new ImmutableSet(Object.values(obj));
+  return new ImmutableSet(Object.values(obj), options);
 }

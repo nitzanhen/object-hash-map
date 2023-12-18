@@ -22,7 +22,7 @@ export class ObjectSet<T> implements Set<T> {
    * If this is an `ObjectSet`, this constructor will create a copy.
    * @param options constructor options.
    */
-  constructor(iterable?: Iterable<T>, options: ObjectMapOptions = {}) {
+  constructor(iterable?: Iterable<T>, options: Partial<ObjectMapOptions> = {}) {
     this._map = new ObjectMap(
       iterable instanceof ObjectSet ? iterable._map : toMapIterable(iterable),
       options
@@ -69,6 +69,10 @@ export class ObjectSet<T> implements Set<T> {
 
   get [Symbol.toStringTag]() {
     return 'ObjectSet';
+  }
+
+  get options(): Omit<ObjectMapOptions, "initialCapacity"> {
+    return this._map.options;
   }
 
   /**
@@ -259,20 +263,20 @@ function* toMapIterable<T>(iterable?: Iterable<T>): Iterable<[T, T]> {
   }
 }
 
-function keysOf<K>(map: Map<K, unknown>): ObjectSet<K>;
-function keysOf<K extends string | number | symbol>(obj: Record<K, unknown>): ObjectSet<K>;
-function keysOf(obj: Map<unknown, unknown> | Record<string | number | symbol, unknown>): ObjectSet<unknown> {
+function keysOf<K>(map: Map<K, unknown>, options?: Partial<ObjectMapOptions>): ObjectSet<K>;
+function keysOf<K extends string | number | symbol>(obj: Record<K, unknown>, options?: Partial<ObjectMapOptions>): ObjectSet<K>;
+function keysOf(obj: Map<unknown, unknown> | Record<string | number | symbol, unknown>, options: Partial<ObjectMapOptions> = {}): ObjectSet<unknown> {
   if ('keys' in obj && typeof obj.keys === 'function') {
-    return new ObjectSet(obj.keys());
+    return new ObjectSet(obj.keys(), options);
   }
-  return new ObjectSet(Object.keys(obj));
+  return new ObjectSet(Object.keys(obj), options);
 }
 
-function valuesOf<V>(map: Map<unknown, V>): ObjectSet<V>;
-function valuesOf<V>(obj: Record<any, V>): ObjectSet<V>;
-function valuesOf(obj: Map<unknown, unknown> | Record<any, unknown>): ObjectSet<unknown> {
+function valuesOf<V>(map: Map<unknown, V>, options?: Partial<ObjectMapOptions>): ObjectSet<V>;
+function valuesOf<V>(obj: Record<any, V>, options?: Partial<ObjectMapOptions>): ObjectSet<V>;
+function valuesOf(obj: Map<unknown, unknown> | Record<any, unknown>, options: Partial<ObjectMapOptions> = {}): ObjectSet<unknown> {
   if ('values' in obj && typeof obj.values === 'function') {
-    return new ObjectSet(obj.values());
+    return new ObjectSet(obj.values(), options);
   }
-  return new ObjectSet(Object.values(obj));
+  return new ObjectSet(Object.values(obj), options);
 }

@@ -14,7 +14,7 @@ export class ImmutableMap<K, V> {
    * Otherwise, if the iterable has a `length` or `size` property - its value will be used as the initial capacity (can be overriden by `initialCapacity` in options). 
    * @param options constructor options.
    */
-  constructor(iterable?: Iterable<[K, V]>, options?: ObjectMapOptions) {
+  constructor(iterable?: Iterable<[K, V]>, options: Partial<ObjectMapOptions> = {}) {
     this._map = new ObjectMap(
       iterable instanceof ImmutableMap ? iterable._map : iterable,
       options
@@ -28,6 +28,10 @@ export class ImmutableMap<K, V> {
 
   get capacity(): number {
     return this._map.capacity;
+  }
+
+  get options(): Omit<ObjectMapOptions, "initialCapacity"> {
+    return this._map.options;
   }
 
   /**
@@ -178,7 +182,7 @@ export class ImmutableMap<K, V> {
   static fromSet<K, V>(
     set: SetLike<K>,
     factory: (key: K) => V,
-    options: ObjectMapOptions = {}
+    options: Partial<ObjectMapOptions> = {}
   ): ImmutableMap<K, V> {
     return new ImmutableMap<K, V>(ObjectMap.fromSet(set, factory, options));
   }

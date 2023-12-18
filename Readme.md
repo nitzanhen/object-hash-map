@@ -61,7 +61,7 @@ const set = new ImmutableSet()
 - **💡 Compare keys by value, not by reference**: Referential equality is outdated - JavaScript objects are nowadays compared by the information they engrain.  
 `objectmap.js`'s crown feature is hashing and comparing objects by value rather than their place in memory; you'll find that `ObjectMap` and `ObjectSet` are a natural fit where the native `Map` and `Set` should have been (read more [below](#🌟-why-value-based-comparison-matters)).
 - **🧰 Equipped with utilities**: alongside the standard `Map` and `Set` interfaces, `objectmap.js` provides convenient methods for dealing with collections (e.g. [filter()](#filterpredicate-value-v-key-k--boolean-objectmapk-v), [map()](#mapwtransform-value-v-key-k--w-objectmapk-w), [reduce()](#reduceareducer-accumulator-a-value-v-key-k--a-initialvalue-a-a), [sort()](#sortcomparefn-a-k-v-b-k-v--number-this)), factories (e.g. [fromSet()](#static-fromsetk-vset-setlikek-factory-key-k--v-options-objectmapoptions-objectmapk-v), [keysOf()](#static-keysofkobj-mapk-unknown--recordk-unknown-objectsetk)) and others (e.g. [pop()](#popkey-k-v--undefined), [update()](#updatekey-k-updater-value-v--undefined-key-k--v-this)).
-- **💯 Has all the numbers**: `objectmap.js` is fast, small, thoroughly tested, side effect free, and is written in TypeScript.
+- **💯 Has all the numbers**: `objectmap.js` is fast, small, well tested, side effect free, and is written in TypeScript.
 
 ## 🌟 Why Value-Based Comparison Matters
 In the modern JavaScript world, *an object is almost always determined solely by information that it contains* - two objects with the same keys and values are considered equal, for virtually all intents and purposes.  
